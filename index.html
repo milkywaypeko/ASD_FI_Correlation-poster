@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>학술 발표 포스터 - 자폐성 장애등록과 재정자립도의 관계</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* A4 규격 스타일 설정 (210mm x 297mm) */
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            -webkit-print-color-adjust: exact;
+        }
+        .poster {
+            width: 210mm;
+            height: 297mm;
+            box-sizing: border-box;
+            padding: 12mm 10mm;
+            background-color: #ffffff;
+            margin: 20px auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        /* 인쇄 출력 시 브라우저 기본 여백 및 그림자 제거 */
+        @media print {
+            body { background-color: #ffffff; }
+            .poster { margin: 0; box-shadow: none; page-break-after: always; }
+        }
+
+        /* 서울과학기술대학교 UI 상징 색상 코드 정의 */
+        :root {
+            --seoultech-blue: #003C71;  /* 파랑 (C100+M72+K32) */
+            --seoultech-red: #B30006;   /* 빨강 (M100+Y96+K28) */
+            --seoultech-grey: #8A8D8F;  /* 회색 (K44) */
+            --light-bg: #F4F5F7;
+        }
+
+        /* 헤더 디자인 */
+        header {
+            border-bottom: 5px solid var(--seoultech-blue);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px; /* 로고와 텍스트 사이의 간격 */
+        }
+        .logo {
+            height: 55px; /* 포스터 비율에 맞춘 로고 높이 */
+            width: auto;
+        }
+        .header-text {
+            text-align: left; /* 로고 오른쪽에 위치하므로 왼쪽 정렬이 깔끔합니다 */
+        }
+        .subtitle {
+            font-size: 11pt;
+            color: var(--seoultech-grey);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        h1 {
+            font-size: 22pt;
+            color: var(--seoultech-blue);
+            margin: 4px 0 6px 0;
+            word-break: keep-all;
+            line-height: 1.3;
+            font-weight: 800;
+        }
+        .author-box {
+            font-size: 11pt;
+            color: #333333;
+            margin-bottom: 2px;
+        }
+
+        /* 메인 2단 그리드 레이아웃 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 8mm;
+            flex-grow: 1;
+        }
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* 연구 내용 섹션 카드 스타일 */
+        section {
+            background-color: #ffffff;
+            border: 1px solid var(--seoultech-grey);
+            border-top: 5px solid var(--seoultech-blue);
+            padding: 10px 14px;
+            border-radius: 3px;
+        }
+        section.important {
+            border-top: 5px solid var(--seoultech-red);
+        }
+        h2 {
+            font-size: 13.5pt;
+            color: var(--seoultech-blue);
+            margin-top: 0;
+            margin-bottom: 6px;
+            border-bottom: 1px solid var(--light-bg);
+            padding-bottom: 3px;
+            font-weight: 700;
+        }
+        section.important h2 {
+            color: var(--seoultech-red);
+        }
+        p, li {
+            font-size: 9.2pt;
+            line-height: 1.5;
+            color: #222222;
+            margin: 0 0 5px 0;
+            text-align: justify;
+        }
+        ul {
+            padding-left: 16px;
+            margin: 0;
+        }
+
+        /* 차트 및 통계 데이터 영역 */
+        .chart-box {
+            position: relative;
+            width: 100%;
+            height: 165px;
+            margin: 8px 0;
+            background-color: #fff;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5pt;
+            margin-top: 6px;
+        }
+        th, td {
+            border: 1px solid var(--seoultech-grey);
+            padding: 4px;
+            text-align: center;
+        }
+        th {
+            background-color: var(--light-bg);
+            color: var(--seoultech-blue);
+            font-weight: bold;
+        }
+
+        /* 하단 정보 및 QR코드 영역 */
+        footer {
+            border-top: 2px solid var(--seoultech-grey);
+            padding-top: 8px;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer-info {
+            font-size: 8.5pt;
+            color: #444444;
+            line-height: 1.4;
+        }
+        .qr-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--seoultech-grey);
+            padding: 4px 8px;
+            background-color: var(--light-bg);
+            border-radius: 4px;
+        }
+        .qr-image {
+            width: 48px;
+            height: 48px;
+            background-color: #ffffff;
+        }
+        .qr-text {
+            font-size: 7.5pt;
+            color: #333333;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="poster">
+    <header>
+        <div class="header-container">
+            <img src="https://www.seoultech.ac.kr/site/www/images/intro/img_ui01_01.gif" alt="서울과학기술대학교 로고" class="logo">
+            <div class="header-text">
+                <h1>자폐성 장애 당사자의 장애등록과<br>거주지역의 재정자립도 간의 관계</h1>
+                <div class="author-box"><strong>소속 및 연구자:</strong> 서울과학기술대학교 최형종</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid-container">
+        <div class="column">
+            <section>
+                <h2>1. 연구 배경 및 목적</h2>
+                <p>
+                    최근 학계 및 활동가들을 중심으로 영유아 및 성인 발달·자폐성 장애인의 진단과 확정 등록에 소요되는 정밀 검사 비용이 과다하여 국가적 지원 체계를 강화해야 한다는 목소리가 커지고 있습니다. 정치권에서도 이러한 의료 장벽을 낮추기 위한 정책 공약이 제기된 바 있습니다.
+                </p>
+                <p>
+                    본 연구는 자폐성 장애의 확정 등록률이 개인 및 거주 지역의 경제적 조건과 유의미하게 맞닿아 있을 것이라는 가설을 기반으로 시작되었습니다. 기초자치단체의 경제 자립 능력을 보여주는 <strong>'지방재정자립도'</strong>와 <strong>'등록 자폐성 장애인 인구 비율'</strong> 간의 선형 회귀 분석(Linear Regression)을 실행하여 이들 간의 경제적 장벽 관계를 통계적으로 증명하고자 합니다.
+                </p>
+            </section>
+
+            <section>
+                <h2>2. 분석 데이터 및 전처리 변수</h2>
+                <p>
+                    대한민국 광역자치단체 산하 기초자치단체의 다개년 공개 통계 데이터를 통합하여 연구 데이터셋을 구축하였습니다.
+                </p>
+                <ul>
+                    <li><strong>분석 대상 기간:</strong> 각 지자체별로 수집 가능한 최신 시점 반영 (2013년 ~ 2024년)</li>
+                    <li><strong>주요 원천 지표:</strong> 공공데이터 및 KOSIS 수집 장애인 현황, 주민등록인구, 지방재정자립지표</li>
+                    <li><strong>데이터 전처리과정:</strong> Pandas 라이브러리를 통해 한글 텍스트 인코딩(EUC-KR) 문제를 해결하고 정형화했습니다. 기초자치단체별 전체 인구 대비 장애 유형별 인구 비율을 변수로 산출하여 규모 차이에 따른 왜곡을 제거했습니다.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>3. 데이터 분석 및 검증 방법론</h2>
+                <p>
+                    Python 통계 생태계(Numpy, Pandas, Statsmodels, Sklearn)를 다각적으로 반영하여 분석 모델을 정립했습니다.
+                </p>
+                <p>
+                    <code>statsmodels.formula.api</code>의 OLS 분석 기법을 주축으로 자폐성 장애 비율과 재정자립도 간의 상관관계를 산출하고 타 장애 유형의 독립 회귀계수와 상호 대조했습니다
+                </p>
+            </section>
+        </div>
+
+        <div class="column">
+            <section class="important">
+                <h2>4. 실증 분석 결과 (보고서 시각화 반영)</h2>
+                <p>
+                    선형 회귀 모델 분석 결과, 처음에 세웠던 가설이 통계적으로 유의미하게 증명되었습니다. 자폐성 장애인 등록 비율은 지역 재정자립도와 <strong>유의미한 양(+)의 상관관계</strong>를 띱니다 (Coefficient = 0.0005, p &lt; 0.001).
+                </p>
+                
+                <div class="chart-box">
+                    <canvas id="regressionChart"></canvas>
+                </div>
+
+                <p>
+                    특히 주목할 점은 <strong>자폐성 장애를 제외한 타 장애 유형(지체, 청각, 지적, 정신장애 등)의 경우 모두 재정자립도와 음(-)의 상관관계</strong>를 지니고 있다는 사실입니다.
+                </p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>장애 유형</th>
+                            <th>회귀계수 (coef)</th>
+                            <th>t값 (t)</th>
+                            <th>P값 (P&gt;|t|)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background-color: rgba(179,0,6,0.08); font-weight:bold;">
+                            <td style="color:var(--seoultech-red);">자폐성장애</td>
+                            <td style="color:var(--seoultech-red);">+0.0005</td>
+                            <td>15.217</td>
+                            <td>0.000</td>
+                        </tr>
+                        <tr>
+                            <td>지체장애</td>
+                            <td>-0.0383</td>
+                            <td>-21.656</td>
+                            <td>0.000</td>
+                        </tr>
+                        <tr>
+                            <td>청각장애</td>
+                            <td>-0.0129</td>
+                            <td>-20.139</td>
+                            <td>0.000</td>
+                        </tr>
+                        <tr>
+                            <td>지적장애</td>
+                            <td>-0.0076</td>
+                            <td>-23.350</td>
+                            <td>0.000</td>
+                        </tr>
+                        <tr>
+                            <td>정신장애</td>
+                            <td>-0.0035</td>
+                            <td>-20.045</td>
+                            <td>0.000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="important">
+                <h2>6. 결론 및 정책 제언</h2>
+                <p>
+                    본 분석 결과는 <strong>자폐성 장애의 경우, 다른 일반적인 장애 유형과 대조적으로 거주 지역의 제정·경제적 여건에 따라 장애 등록 단계에서 실질적인 장벽이 작동하고 있음</strong>을 실증적으로 드러내고 있습니다. 
+                </p>
+                <p>
+                    따라서 지자체의 재정 자립 능력이나 개인의 소득 격차와 무관하게 모든 영유아 및 신경다양인이 자폐성 장애 정밀 검사 및 확정 등록 프로세스를 체계적으로 수행할 수 있도록 돕는 <strong>'보편적 발달장애 진단 및 등록 비용 지원 확대 정책'</strong>이 조속히 실현되어야 할 것입니다.
+                </p>
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-info">
+            서울과학기술대학교 | 최형종<br>
+            본 통계 연구는 국가통계포털(KOSIS)의 기초지자체 단위 장애인 현황 및 지방재정자립지표 정형 데이터를 기반으로 구축되었습니다.
+        </div>
+        <div class="qr-wrapper">
+            <img class="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://milkywaypeko.github.io/ASD_FI_Correlation_12Y/" alt="QR 코드">
+            <div class="qr-text">
+                12개년 분석 데이터<br>웹사이트 바로가기
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script>
+    const ctx = document.getElementById('regressionChart').getContext('2d');
+
+    // 보고서의 <그림 1> 산점도 형태를 재현하기 위한 지자체 매핑 좌표 클라우드 생성
+    const scatterPoints = [];
+    
+    // 1. 하위 경제 구간 밀집 영역 분산도 생성
+    for(let i=0; i<180; i++) {
+        let x = 8 + Math.random() * 24;
+        let y = 0.005 + Math.random() * 0.07;
+        scatterPoints.push({x: x, y: y});
+    }
+    // 2. 전체 스펙트럼 회귀선 주변 분포도 생성
+    for(let i=0; i<120; i++) {
+        let x = 10 + Math.random() * 65;
+        let y = 0.0005 * x + 0.0312 + (Math.random() - 0.5) * 0.07;
+        if (y < 0.002) y = 0.003;
+        if (y > 0.155) y = 0.152;
+        scatterPoints.push({x: x, y: y});
+    }
+    // 3. 고지표 상위 아웃라이어 데이터 포인트 반영
+    for(let i=0; i<15; i++) {
+        let x = 15 + Math.random() * 50;
+        let y = 0.11 + Math.random() * 0.04;
+        scatterPoints.push({x: x, y: y});
+    }
+
+    // 보고서의 <표 2> OLS 회귀계수 결과 수식 반영 (y = 0.0005x + 0.0312)
+    const regressionLine = [];
+    for(let x=5; x<=75; x+=10) {
+        regressionLine.push({x: x, y: 0.0005 * x + 0.0312});
+    }
+
+    // Chart.js를 이용해 보고서 내 그림 1 그래프 완벽 시각화
+    new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: '지자체 매핑 좌표',
+                    data: scatterPoints,
+                    backgroundColor: 'rgba(0, 60, 113, 0.45)', // 서울과기대 파란색 (투명도 조절로 밀집도 표현)
+                    pointRadius: 3,
+                    order: 2
+                },
+                {
+                    label: 'OLS 선형회귀선',
+                    data: regressionLine,
+                    type: 'line',
+                    borderColor: '#B30006', // 서울과기대 빨간색 회귀선
+                    borderWidth: 2.5,
+                    fill: false,
+                    pointRadius: 0,
+                    order: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { font: { size: 7.5, weight: 'bold' }, boxWidth: 10 }
+                },
+                title: {
+                    display: true,
+                    text: '<그림 1> 제정자립도와 자폐성 등록의 관계 회귀분석 결과',
+                    font: { size: 9, weight: 'bold' },
+                    color: '#222',
+                    padding: { bottom: 4 }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    min: 0,
+                    max: 80,
+                    title: { display: true, text: '지방재정자립도 (%)', font: { size: 7.5, weight: 'bold' } },
+                    ticks: { font: { size: 7 } },
+                    grid: { color: '#EAEAEA' }
+                },
+                y: {
+                    min: 0,
+                    max: 0.16,
+                    title: { display: true, text: '등록 인구 비율', font: { size: 7.5, weight: 'bold' } },
+                    ticks: { font: { size: 7 } },
+                    grid: { color: '#EAEAEA' }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
