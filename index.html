@@ -54,14 +54,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px; /* 로고와 텍스트 사이의 간격 */
+            gap: 20px;
         }
         .logo {
-            height: 55px; /* 포스터 비율에 맞춘 로고 높이 */
+            height: 55px;
             width: auto;
         }
         .header-text {
-            text-align: left; /* 로고 오른쪽에 위치하므로 왼쪽 정렬이 깔끔합니다 */
+            text-align: left;
         }
         .subtitle {
             font-size: 11pt;
@@ -135,11 +135,17 @@
         .chart-box {
             position: relative;
             width: 100%;
-            height: 165px;
+            height: 175px;
             margin: 8px 0;
             background-color: #fff;
         }
         
+        .graph-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -233,11 +239,11 @@
             <section>
                 <h2>3. 데이터 분석 및 검증 방법론</h2>
                 <p>
-                    Python 통계 생태계(Numpy, Pandas, Statsmodels, Sklearn)를 다각적으로 반영하여 분석 모델을 정립했습니다.
+                    Python의 <code>statsmodels</code>의 OLS 분석 기법으로 자폐성 장애 비율과 재정자립도 간의 상관관계를 산출하고 타 장애 유형의 독립 회귀계수와 상호 대조했습니다.
                 </p>
-                <p>
-                    <code>statsmodels.formula.api</code>의 OLS 분석 기법을 주축으로 자폐성 장애 비율과 재정자립도 간의 상관관계를 산출하고 타 장애 유형의 독립 회귀계수와 상호 대조했습니다
-                </p>
+                <div class="chart-box" style="height: 135px; margin-top: 10px;">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
             </section>
         </div>
 
@@ -249,7 +255,7 @@
                 </p>
                 
                 <div class="chart-box">
-                    <canvas id="regressionChart"></canvas>
+                    <img src="graph.png" alt="<그림 1> 재정자립도와 자폐성 등록의 관계 회귀분석 결과" class="graph-image">
                 </div>
 
                 <p>
@@ -303,7 +309,7 @@
             <section class="important">
                 <h2>5. 결론 및 정책 제언</h2>
                 <p>
-                    본 분석 결과는 <strong>자폐성 장애의 경우, 다른 일반적인 장애 유형과 대조적으로 거주 지역의 제정·경제적 여건에 따라 장애 등록 단계에서 실질적인 장벽이 작동하고 있음</strong>을 실증적으로 드러내고 있습니다. 
+                    본 분석 결과는 <strong>자폐성 장애의 경우, 다른 일반적인 장애 유형과 대조적으로 거주 지역의 재정·경제적 여건에 따라 장애 등록 단계에서 실질적인 장벽이 작동하고 있음</strong>을 실증적으로 드러내고 있습니다. 
                 </p>
                 <p>
                     따라서 지자체의 재정 자립 능력이나 개인의 소득 격차와 무관하게 모든 영유아 및 신경다양인이 자폐성 장애 정밀 검사 및 확정 등록 프로세스를 체계적으로 수행할 수 있도록 돕는 <strong>'보편적 발달장애 진단 및 등록 비용 지원 확대 정책'</strong>이 조속히 실현되어야 할 것입니다.
@@ -327,94 +333,47 @@
 </div>
 
 <script>
-    const ctx = document.getElementById('regressionChart').getContext('2d');
-
-    // 보고서의 <그림 1> 산점도 형태를 재현하기 위한 지자체 매핑 좌표 클라우드 생성
-    const scatterPoints = [];
-    
-    // 1. 하위 경제 구간 밀집 영역 분산도 생성
-    for(let i=0; i<180; i++) {
-        let x = 8 + Math.random() * 24;
-        let y = 0.005 + Math.random() * 0.07;
-        scatterPoints.push({x: x, y: y});
-    }
-    // 2. 전체 스펙트럼 회귀선 주변 분포도 생성
-    for(let i=0; i<120; i++) {
-        let x = 10 + Math.random() * 65;
-        let y = 0.0005 * x + 0.0312 + (Math.random() - 0.5) * 0.07;
-        if (y < 0.002) y = 0.003;
-        if (y > 0.155) y = 0.152;
-        scatterPoints.push({x: x, y: y});
-    }
-    // 3. 고지표 상위 아웃라이어 데이터 포인트 반영
-    for(let i=0; i<15; i++) {
-        let x = 15 + Math.random() * 50;
-        let y = 0.11 + Math.random() * 0.04;
-        scatterPoints.push({x: x, y: y});
-    }
-
-    // 보고서의 <표 2> OLS 회귀계수 결과 수식 반영 (y = 0.0005x + 0.0312)
-    const regressionLine = [];
-    for(let x=5; x<=75; x+=10) {
-        regressionLine.push({x: x, y: 0.0005 * x + 0.0312});
-    }
-
-    // Chart.js를 이용해 보고서 내 그림 1 그래프 완벽 시각화
-    new Chart(ctx, {
-        type: 'scatter',
+    // 3번 아래에 렌더링될 장애 유형별 회귀계수 비교 차트 스크립트
+    const ctxComp = document.getElementById('comparisonChart').getContext('2d');
+    new Chart(ctxComp, {
+        type: 'bar',
         data: {
-            datasets: [
-                {
-                    label: '지자체 매핑 좌표',
-                    data: scatterPoints,
-                    backgroundColor: 'rgba(0, 60, 113, 0.45)', // 서울과기대 파란색 (투명도 조절로 밀집도 표현)
-                    pointRadius: 3,
-                    order: 2
-                },
-                {
-                    label: 'OLS 선형회귀선',
-                    data: regressionLine,
-                    type: 'line',
-                    borderColor: '#B30006', // 서울과기대 빨간색 회귀선
-                    borderWidth: 2.5,
-                    fill: false,
-                    pointRadius: 0,
-                    order: 1
-                }
-            ]
+            labels: ['자폐성', '정신', '지적', '청각', '지체'],
+            datasets: [{
+                data: [0.0005, -0.0035, -0.0076, -0.0129, -0.0383],
+                backgroundColor: [
+                    '#B30006', // 자폐성장애 (SeoulTech Red - 강조)
+                    '#003C71', // 정신장애 (SeoulTech Blue)
+                    '#003C71', // 지적장애
+                    '#003C71', // 청각장애
+                    '#003C71'  // 지체장애
+                ],
+                borderRadius: 3
+            }]
         },
         options: {
+            indexAxis: 'y', // 가로 막대 그래프 레이아웃 시각화 효과
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { font: { size: 7.5, weight: 'bold' }, boxWidth: 10 }
-                },
+                legend: { display: false },
                 title: {
                     display: true,
-                    text: '<그림 1> 제정자립도와 자폐성 등록의 관계 회귀분석 결과',
-                    font: { size: 9, weight: 'bold' },
+                    text: '<그림 2> 주요 장애 유형별 재정자립도 회귀계수(coef) 비교',
+                    font: { size: 9.5, weight: 'bold' },
                     color: '#222',
-                    padding: { bottom: 4 }
+                    padding: { bottom: 6 }
                 }
             },
             scales: {
                 x: {
-                    type: 'linear',
-                    position: 'bottom',
-                    min: 0,
-                    max: 80,
-                    title: { display: true, text: '지방재정자립도 (%)', font: { size: 7.5, weight: 'bold' } },
-                    ticks: { font: { size: 7 } },
-                    grid: { color: '#EAEAEA' }
+                    grid: { color: '#F0F0F0' },
+                    ticks: { font: { size: 8 } },
+                    title: { display: true, text: '회귀계수 값', font: { size: 8, weight: 'bold' } }
                 },
                 y: {
-                    min: 0,
-                    max: 0.16,
-                    title: { display: true, text: '등록 인구 비율', font: { size: 7.5, weight: 'bold' } },
-                    ticks: { font: { size: 7 } },
-                    grid: { color: '#EAEAEA' }
+                    grid: { display: false },
+                    ticks: { font: { size: 8.5, weight: 'bold' }, color: '#333' }
                 }
             }
         }
